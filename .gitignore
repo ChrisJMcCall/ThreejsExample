@@ -1,0 +1,7 @@
+*node_modules
+*.ds_store
+package-lock.json
+dist/*
+
+# Keep this index.html file
+!dist/index.html
