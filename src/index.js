@@ -8,18 +8,46 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 var light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
 scene.add( light );
-var renderer = new THREE.WebGLRenderer();
+var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+var icosahedronGeometry = new THREE.IcosahedronGeometry( 20, 0 );
+var material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
+
 // var cube = new THREE.Mesh( geometry, material );
 // scene.add( cube );
+var icosahedron = new THREE.Mesh( icosahedronGeometry, material );
+var wireframeId = null;
 
+// scene.add(icosahedron);
+reloadWireframe();
+animate();
 camera.position.z = 55;
 
+function reloadWireframe() {
+  var geo = new THREE.EdgesGeometry( icosahedronGeometry ); // or WireframeGeometry( geometry )
+  var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 1 } );
+  var wireframe = new THREE.LineSegments( geo, mat );
 
+  if (wireframeId == null) {
+    scene.add(wireframe);
+  } else {
+    var currentWireframe = scene.getObjectById(wireframeId);
+    var currentWireframeRotation = currentWireframe.rotation;
+    
+    currentWireframeRotation.x += 0.001;
+    currentWireframeRotation.y += 0.001;
+    wireframe.rotation.x = currentWireframeRotation.x;
+    wireframe.rotation.y = currentWireframeRotation.y;
+
+    scene.remove(currentWireframe);
+    scene.add(wireframe);
+  }
+
+  wireframeId = wireframe.id;
+}
 
 // instantiate a loader
 var loader = new THREE.OBJLoader();
@@ -40,9 +68,9 @@ loader.load(
       }
 
   });
-		scene.add( object );
+		// scene.add( object );
 
-    animate();
+    // animate();
 	},
 	// called when loading is in progresses
 	function ( xhr ) {
@@ -59,11 +87,48 @@ loader.load(
 );
 var selectedMesh = null;
 function animate() {
+  icosahedron.geometry.vertices.forEach(vertex => {
+    // 1 - x+
+    // 2 - y+
+    // 3 - z+
+    // 4 - x-
+    // 5 - y-
+    // 6 - z-
+    var action = (Math.floor(Math.random() * 20) + 1);
+    var adjust = Math.random();
+
+    switch (action) {
+      case 1:
+        vertex.add(new THREE.Vector3(adjust, 0 , 0));
+        break;
+      case 2:
+        vertex.add(new THREE.Vector3(0, adjust, 0));
+        break;
+      case 3:
+        vertex.add(new THREE.Vector3(0, 0, adjust));
+        break;
+      case 4:
+        vertex.x -= adjust;
+        break;
+      case 5:
+        vertex.y -= adjust;
+        break;
+      case 6:
+        vertex.z -= adjust;
+        break;
+    }
+    icosahedron.geometry.verticesNeedUpdate = true;
+  });
+
+  reloadWireframe();
+
   requestAnimationFrame( animate );
-  // cube.rotation.x += 0.01;
+  icosahedron.rotation.y += 0.001;
+  icosahedron.rotation.x += 0.001;
   // cube.rotation.y += 0.01;
-  planeGroup.rotation.y += 0.01;
-  planeGroup.rotation.x += 0.01;
+  // cube.rotation.y += 0.01;
+  // planeGroup.rotation.y += 0.01;
+  // planeGroup.rotation.x += 0.01;
   if (selectedMesh) {
     selectedMesh.rotation.y += 0.51;
   }
