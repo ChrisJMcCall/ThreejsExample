@@ -1,8 +1,6 @@
 import * as THREE from './three';
 import './OBJLoader';
 
-// THREE.OBJLoader = OBJLoader;
-
 var scene = new THREE.Scene();
 // scene.background = new THREE.Color( 0xff0000 );
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -12,16 +10,12 @@ var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-var geometry = new THREE.BoxGeometry( 1, 1, 1 );
 var icosahedronGeometry = new THREE.IcosahedronGeometry( 20, 0 );
 var material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
 
-// var cube = new THREE.Mesh( geometry, material );
-// scene.add( cube );
 var icosahedron = new THREE.Mesh( icosahedronGeometry, material );
 var wireframeId = null;
 
-// scene.add(icosahedron);
 reloadWireframe();
 animate();
 camera.position.z = 55;
@@ -68,10 +62,9 @@ loader.load(
       }
 
   });
-		// scene.add( object );
 
-    // animate();
-	},
+  },
+
 	// called when loading is in progresses
 	function ( xhr ) {
 
@@ -99,13 +92,13 @@ function animate() {
 
     switch (action) {
       case 1:
-        vertex.add(new THREE.Vector3(adjust, 0 , 0));
+        vertex.x += adjust;
         break;
       case 2:
-        vertex.add(new THREE.Vector3(0, adjust, 0));
+        vertex.y += adjust;
         break;
       case 3:
-        vertex.add(new THREE.Vector3(0, 0, adjust));
+        vertex.z += adjust;
         break;
       case 4:
         vertex.x -= adjust;
@@ -125,10 +118,8 @@ function animate() {
   requestAnimationFrame( animate );
   icosahedron.rotation.y += 0.001;
   icosahedron.rotation.x += 0.001;
-  // cube.rotation.y += 0.01;
-  // cube.rotation.y += 0.01;
-  // planeGroup.rotation.y += 0.01;
-  // planeGroup.rotation.x += 0.01;
+
+  // Testing to see if I can interact with part of a model through a mouse click.
   if (selectedMesh) {
     selectedMesh.rotation.y += 0.51;
   }
@@ -150,15 +141,14 @@ window.onload = function() {
 
       raycaster.setFromCamera(mouse, camera);
 
-      // meshObjects = [mesh, mesh2, mesh3]; // three.js objects with click handlers we are interested in
-       
       var intersects = raycaster.intersectObjects(planeMeshes);
 
       if (intersects.length > 0) {
-          // intersects[0].object.callback();
-          // console.log("intersects");
+          // Use this to "highlight" this clicked part of the model if it is made up
+          // of different meshes.
           // intersects[0].object.material = material;
           selectedMesh = intersects[0].object;
+
           // get the current camera position
           const { x, y, z } = camera.position
           const start = new THREE.Vector3(x, y, z)
@@ -167,25 +157,10 @@ window.onload = function() {
           const point = intersects[0].point
           camera.lookAt(point);
           camera.position.z = 25;
-          // const camDistance = camera.position.length()
-          // camera.position
-          //   .copy(point)
-          //   .normalize()
-          //   .multiplyScalar(camDistance)
 
-          // save the camera position
-          // const { x: a, y: b, z: c } = camera.position
-
-          // invert back to original position
-          // camera.position
-          //   .copy(start)
-          //   .normalize()
-          //   .multiplyScalar(camDistance)
-
-          // // animate from start to end
-          // TweenMax.to(camera.position, 1, { x: a, y: b, z: c })
       } else {
         camera.position.z = 55;
+
       }
 
   }
