@@ -11,6 +11,7 @@
   "author": "Chris McCall",
   "license": "",
   "devDependencies": {
+    "file-loader": "^2.0.0",
     "webpack": "^4.19.0",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.8"
